@@ -1,0 +1,15 @@
+1
+00:00:05,000 --> 00:00:11,000
+Teacher: 你這裡 impression 不能只放 findings，要回答 clinical question。
+
+2
+00:00:20,000 --> 00:00:29,000
+Resident: 我本來想說這樣寫比較保守。
+
+3
+00:00:31,000 --> 00:00:40,000
+Teacher: 你看這裡，對照 DWI 和 ADC，這張比較能支持你要描述的位置。
+
+4
+00:00:48,000 --> 00:00:55,000
+Teacher: 這個 critical finding 需要通知臨床，報告裡也要寫 communication。

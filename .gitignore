@@ -1,0 +1,47 @@
+# Local environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Clinical source data and generated artifacts
+data/
+outputs/
+work/
+portal.log
+*.mp4
+*.mov
+*.m4v
+*.avi
+*.wav
+*.m4a
+*.pptx
+*.dcm
+
+# Model caches
+whisper_cache/
+huggingface/
+.cache/
+
+# Node dependencies
+node_modules/
+npm-debug.log*
+
+# Lecture-specific reviewed responses and legacy local builders
+scripts/prepare_0714_llm_responses.py
+scripts/prepare_0721_llm_responses.py
+scripts/generate_semantic_teaching_clips.py
+scripts/build_teaching_library.py
+scripts/build_video_demo.mjs
+

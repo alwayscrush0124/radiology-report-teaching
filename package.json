@@ -1,0 +1,14 @@
+{
+  "name": "radiology-report-teaching-atlas-slides",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Optional PowerPoint generation utilities for Radiology Report Teaching Atlas.",
+  "type": "module",
+  "scripts": {
+    "build:slides": "node scripts/build_full_video_deck.mjs"
+  },
+  "dependencies": {
+    "pptxgenjs": "^4.0.1"
+  }
+}
+
