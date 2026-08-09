@@ -18,6 +18,9 @@ def main() -> None:
     parser.add_argument("--url", default=os.environ.get("SUPABASE_URL") or secrets.get("SUPABASE_URL"))
     parser.add_argument("--key", default=os.environ.get("SUPABASE_KEY") or secrets.get("SUPABASE_KEY"))
     parser.add_argument("--data-root", type=Path)
+    parser.add_argument("--lecture-date", required=True, help="YYYY-MM-DD")
+    parser.add_argument("--source-video", default="")
+    parser.add_argument("--storage-prefix", default="", help="例如 2026-07-07/")
     args = parser.parse_args()
     if not args.url or not args.key:
         parser.error("請提供 SUPABASE_URL 與 SUPABASE_KEY")
@@ -28,8 +31,17 @@ def main() -> None:
     for position, case in enumerate(cases, 1):
         subtitle = local.read_case_text(case["card_id"], "subtitle")
         transcript = local.read_case_text(case["card_id"], "transcript")
-        cloud.upsert_case(case, subtitle, transcript)
-        print(f"[{position}/{len(cases)}] {case['card_id']} {case['title']}")
+        filename = Path(case.get("assets", {}).get("teaching_clip", "")).name
+        storage_path = f"{args.storage_prefix.rstrip('/')}/{filename}".lstrip("/") if args.storage_prefix else ""
+        cloud.upsert_case(
+            case,
+            subtitle,
+            transcript,
+            lecture_date=args.lecture_date,
+            source_video=args.source_video,
+            storage_path=storage_path,
+        )
+        print(f"[{position}/{len(cases)}] {args.lecture_date} {case['card_id']} {case['title']}")
     print(f"Imported {len(cases)} cases to Supabase.")
 
 

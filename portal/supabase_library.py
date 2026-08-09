@@ -31,6 +31,21 @@ class SupabaseError(RuntimeError):
     pass
 
 
+def normalize_lecture_date(value: str) -> str:
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date().isoformat()
+    except ValueError as exc:
+        raise ValueError("lecture date 必須使用 YYYY-MM-DD 格式") from exc
+
+
+def make_record_id(lecture_date: str, card_id: str) -> str:
+    date_part = normalize_lecture_date(lecture_date).replace("-", "")
+    local_id = card_id.strip().upper()
+    if not local_id:
+        raise ValueError("card_id 不可為空")
+    return f"{date_part}_{local_id}"
+
+
 class SupabaseTeachingLibrary:
     def __init__(self, url: str, key: str, data_root: Path | None = None) -> None:
         self.url = url.rstrip("/")
@@ -78,35 +93,45 @@ class SupabaseTeachingLibrary:
     def load_cases(self) -> list[dict]:
         rows = self._request(
             "atlas_cases",
-            query={"select": "card_id,metadata,updated_at", "order": "card_id.asc"},
+            query={"select": "record_id,card_id,lecture_date,source_video,storage_path,metadata,updated_at", "order": "lecture_date.desc,card_id.asc"},
         )
         return [self._case_from_row(row) for row in rows]
 
-    def get_case(self, card_id: str) -> dict:
+    def get_case(self, record_id: str) -> dict:
         rows = self._request(
             "atlas_cases",
-            query={"select": "card_id,metadata,updated_at", "card_id": f"eq.{card_id}", "limit": "1"},
+            query={"select": "record_id,card_id,lecture_date,source_video,storage_path,metadata,updated_at", "record_id": f"eq.{record_id}", "limit": "1"},
         )
         if not rows:
-            raise FileNotFoundError(f"Supabase 找不到 Case：{card_id}")
+            raise FileNotFoundError(f"Supabase 找不到 Case：{record_id}")
         return self._case_from_row(rows[0])
 
     @staticmethod
     def _case_from_row(row: dict) -> dict:
         case = dict(row.get("metadata") or {})
-        case.setdefault("card_id", row["card_id"])
+        case["record_id"] = row.get("record_id", case.get("record_id", row["card_id"]))
+        case["card_id"] = row["card_id"]
+        case["lecture_date"] = str(row.get("lecture_date") or case.get("lecture_date", ""))
+        case["source_video"] = row.get("source_video") or case.get("source_video", "")
+        case["storage_path"] = row.get("storage_path") or case.get("storage_path", "")
         case["_cloud_updated_at"] = row.get("updated_at", "")
         return case
 
     def save_case(self, case: dict) -> None:
         clean = {key: value for key, value in case.items() if not key.startswith("_")}
         clean["updated_at"] = datetime.now(timezone.utc).isoformat()
-        card_id = clean["card_id"]
+        record_id = clean.get("record_id") or clean["card_id"]
         self._request(
             "atlas_cases",
             method="PATCH",
-            query={"card_id": f"eq.{card_id}"},
-            payload={"metadata": clean},
+            query={"record_id": f"eq.{record_id}"},
+            payload={
+                "metadata": clean,
+                "card_id": clean["card_id"],
+                "lecture_date": clean["lecture_date"],
+                "source_video": clean.get("source_video", ""),
+                "storage_path": clean.get("storage_path", ""),
+            },
             prefer="return=representation",
         )
 
@@ -122,33 +147,33 @@ class SupabaseTeachingLibrary:
             raise ValueError("素材路徑不可超出 ATLAS_DATA_ROOT") from exc
         return target if target.exists() else None
 
-    def read_case_text(self, card_id: str, asset_name: str) -> str:
+    def read_case_text(self, record_id: str, asset_name: str) -> str:
         if asset_name not in {"subtitle", "transcript"}:
             raise ValueError("只允許讀取 subtitle 或 transcript")
         rows = self._request(
             "atlas_cases",
-            query={"select": asset_name, "card_id": f"eq.{card_id}", "limit": "1"},
+            query={"select": asset_name, "record_id": f"eq.{record_id}", "limit": "1"},
         )
         if not rows:
-            raise FileNotFoundError(f"Supabase 找不到 Case：{card_id}")
+            raise FileNotFoundError(f"Supabase 找不到 Case：{record_id}")
         return rows[0].get(asset_name, "")
 
-    def save_case_text(self, card_id: str, subtitle: str, transcript: str) -> None:
+    def save_case_text(self, record_id: str, subtitle: str, transcript: str) -> None:
         errors = TeachingLibrary.validate_srt(subtitle)
         if errors:
             raise ValueError("；".join(errors))
         self._request(
             "atlas_cases",
             method="PATCH",
-            query={"card_id": f"eq.{card_id}"},
+            query={"record_id": f"eq.{record_id}"},
             payload={"subtitle": subtitle.strip() + "\n", "transcript": transcript.strip() + "\n"},
             prefer="return=representation",
         )
-        case = self.get_case(card_id)
+        case = self.get_case(record_id)
         case["subtitle_updated_at"] = datetime.now(timezone.utc).isoformat()
         self.save_case(case)
 
-    def save_card_content(self, card_id: str, updates: dict[str, str]) -> None:
+    def save_card_content(self, record_id: str, updates: dict[str, str]) -> None:
         allowed = {
             "title", "teaching_point", "common_pitfall",
             "suggested_report_phrase", "checklist_item_for_next_report",
@@ -159,7 +184,7 @@ class SupabaseTeachingLibrary:
             raise ValueError(f"不允許更新欄位：{', '.join(sorted(unexpected))}")
         if any(not str(value).strip() for value in updates.values()):
             raise ValueError("卡片欄位不可留白")
-        case = self.get_case(card_id)
+        case = self.get_case(record_id)
         case.update({key: str(value).strip() for key, value in updates.items()})
         case["card_content_updated_at"] = datetime.now(timezone.utc).isoformat()
         self.save_case(case)
@@ -189,13 +214,35 @@ class SupabaseTeachingLibrary:
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return path
 
-    def upsert_case(self, case: dict, subtitle: str, transcript: str) -> None:
+    def upsert_case(
+        self,
+        case: dict,
+        subtitle: str,
+        transcript: str,
+        *,
+        lecture_date: str,
+        source_video: str = "",
+        storage_path: str = "",
+    ) -> None:
         clean = {key: value for key, value in case.items() if not key.startswith("_")}
+        local_card_id = clean["card_id"]
+        record_id = make_record_id(lecture_date, local_card_id)
+        clean.update({
+            "record_id": record_id,
+            "card_id": local_card_id,
+            "lecture_date": normalize_lecture_date(lecture_date),
+            "source_video": source_video,
+            "storage_path": storage_path,
+        })
         self._request(
             "atlas_cases",
             method="POST",
             payload={
-                "card_id": clean["card_id"],
+                "record_id": record_id,
+                "card_id": local_card_id,
+                "lecture_date": clean["lecture_date"],
+                "source_video": source_video,
+                "storage_path": storage_path,
                 "metadata": clean,
                 "subtitle": subtitle,
                 "transcript": transcript,
