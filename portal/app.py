@@ -9,7 +9,7 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from portal.library import TeachingLibrary
-from portal.media import playable_video_url, srt_to_vtt
+from portal.media import DriveVideoError, download_drive_video, playable_video_url, srt_to_vtt
 from portal.supabase_library import SupabaseTeachingLibrary
 
 
@@ -47,6 +47,11 @@ def case_label(case: dict) -> str:
     return f"{prefix}{case['card_id']} · {case['title']}"
 
 
+@st.cache_data(ttl=3600, max_entries=3, show_spinner=False)
+def cached_drive_video(url: str) -> bytes:
+    return download_drive_video(url)
+
+
 def show_video(repo: TeachingLibrary, case: dict) -> None:
     video = repo.resolve_asset(case["assets"].get("teaching_clip", ""))
     subtitle = repo.resolve_asset(case["assets"].get("subtitle", ""))
@@ -59,7 +64,13 @@ def show_video(repo: TeachingLibrary, case: dict) -> None:
             current_subtitle = repo.read_case_text(case_key(case), "subtitle")
         except (FileNotFoundError, ValueError):
             current_subtitle = ""
-        st.video(video_url, subtitles=srt_to_vtt(current_subtitle) if current_subtitle else None)
+        try:
+            with st.spinner("載入教學影片..."):
+                video_bytes = cached_drive_video(str(video))
+        except DriveVideoError as exc:
+            st.error(f"影片載入失敗：{exc}")
+            return
+        st.video(video_bytes, format="video/mp4", subtitles=srt_to_vtt(current_subtitle) if current_subtitle else None)
         return
     try:
         st.video(str(video), subtitles=str(subtitle) if subtitle else None)
