@@ -184,6 +184,10 @@ Portal 提供 Dashboard、Case Library、Review Workspace 與 Teaching Set Build
 
 預設網址為 `http://127.0.0.1:8501`。專案可放在 iCloud Drive、Google Drive、Dropbox 或 OneDrive；詳細設定與多電腦同步注意事項請見 `portal/README.md`。
 
+### Supabase 雲端資料庫
+
+公開部署時，去識別化的卡片 metadata、字幕、逐字稿與教案集合可存入 Supabase；大型影片仍應放在獨立的雲端檔案空間。資料表與權限設定請見 [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md)。
+
 ## Teaching Moment 偵測類型
 
 規則模式的 `app/segment_detector.py` 與 Manual LLM 模式共用以下分類：
