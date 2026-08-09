@@ -141,6 +141,10 @@ def library_page(repo: TeachingLibrary) -> None:
         st.write(case["teaching_point"])
         st.write("**常見陷阱**")
         st.write(case["common_pitfall"])
+        st.write("**下次報告注意**")
+        st.write(case.get("checklist_item_for_next_report") or "尚未填寫")
+        st.write("**建議報告句**")
+        st.write(case.get("suggested_report_phrase") or "尚未填寫")
 
 
 def review_page(repo: TeachingLibrary) -> None:

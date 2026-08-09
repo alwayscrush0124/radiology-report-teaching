@@ -141,6 +141,7 @@ def main() -> None:
             "teaching_type": card["teaching_moment_type"], "report_issue_type": card["report_issue_type"],
             "image_dependency": card["image_dependency"], "teaching_point": card["key_teaching_point"],
             "common_pitfall": card["common_pitfall"], "suggested_report_phrase": card["improved_report_phrase"],
+            "checklist_item_for_next_report": card.get("checklist_item_for_next_report", ""),
             "source_time_range": card["timestamp_range"], "teaching_clip_range": clip["teaching_clip_range"],
             "duration_seconds": clip["duration_seconds"],
             "assets": {
