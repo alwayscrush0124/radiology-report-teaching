@@ -36,6 +36,13 @@ class TeachingLibrary:
             cases.append(case)
         return cases
 
+    @property
+    def location_label(self) -> str:
+        return str(self.data_root)
+
+    def taxonomy(self) -> dict[str, str]:
+        return json.loads((self.library_root / "taxonomy.json").read_text(encoding="utf-8"))
+
     def get_case(self, card_id: str) -> dict:
         path = self.cases_root / card_id / "metadata.json"
         case = json.loads(path.read_text(encoding="utf-8"))
@@ -200,7 +207,7 @@ class TeachingLibrary:
         return path
 
     def _rebuild_views(self, cases: list[dict]) -> None:
-        taxonomy = json.loads((self.library_root / "taxonomy.json").read_text(encoding="utf-8"))
+        taxonomy = self.taxonomy()
         views_root = self.library_root / "views"
         views_root.mkdir(exist_ok=True)
         for code, label in taxonomy.items():

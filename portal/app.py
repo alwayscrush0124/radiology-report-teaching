@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import json
+import os
 import sys
 from pathlib import Path
 
@@ -9,12 +9,24 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from portal.library import TeachingLibrary
+from portal.supabase_library import SupabaseTeachingLibrary
 
 
 st.set_page_config(page_title="Radiology Teaching Atlas", page_icon="🩻", layout="wide")
 
 
-def repository() -> TeachingLibrary:
+def repository() -> TeachingLibrary | SupabaseTeachingLibrary:
+    try:
+        secrets = st.secrets
+        for name in ("SUPABASE_URL", "SUPABASE_KEY"):
+            if name in secrets:
+                os.environ[name] = secrets[name]
+    except FileNotFoundError:
+        pass
+    from portal.supabase_library import configured_supabase_library
+    cloud = configured_supabase_library()
+    if cloud:
+        return cloud
     return TeachingLibrary()
 
 
@@ -105,7 +117,7 @@ def review_page(repo: TeachingLibrary) -> None:
         show_video(repo, case)
         st.caption(f"片段：{case['teaching_clip_range']} · {case['duration_seconds']:.0f} 秒")
     with form_col, st.form("review_form"):
-        taxonomy = json.loads((repo.library_root / "taxonomy.json").read_text(encoding="utf-8"))
+        taxonomy = repo.taxonomy()
         selected_codes = st.multiselect("VITAMIN-CD", list(taxonomy), default=[tag["code"] for tag in case["vitamin_cd"]], format_func=lambda code: f"{code} · {taxonomy[code]}")
         anatomy = st.text_input("解剖部位（逗號分隔）", ", ".join(case["anatomy"]))
         modality = st.text_input("Modality（逗號分隔）", ", ".join(case["modality"]))
@@ -201,7 +213,7 @@ def builder_page(repo: TeachingLibrary) -> None:
 
 repo = repository()
 page = st.sidebar.radio("功能", ["Dashboard", "Case Library", "Review Workspace", "Transcript Editor", "Card Editor", "Teaching Set Builder"])
-st.sidebar.caption(f"資料位置：{repo.data_root}")
+st.sidebar.caption(f"資料位置：{repo.location_label}")
 if page == "Dashboard":
     dashboard_page(repo)
 elif page == "Case Library":

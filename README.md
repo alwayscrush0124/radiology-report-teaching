@@ -188,6 +188,8 @@ Portal 提供 Dashboard、Case Library、Review Workspace 與 Teaching Set Build
 
 公開部署時，去識別化的卡片 metadata、字幕、逐字稿與教案集合可存入 Supabase；大型影片仍應放在獨立的雲端檔案空間。資料表與權限設定請見 [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md)。
 
+Streamlit Community Cloud 的部署欄位、Secrets 與公開權限設定請見 [`docs/STREAMLIT_DEPLOYMENT.md`](docs/STREAMLIT_DEPLOYMENT.md)。
+
 ## Teaching Moment 偵測類型
 
 規則模式的 `app/segment_detector.py` 與 Manual LLM 模式共用以下分類：
