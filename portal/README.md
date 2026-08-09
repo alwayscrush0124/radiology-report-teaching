@@ -19,10 +19,15 @@ Portal 包含 Dashboard、Case Library、Review Workspace、Transcript Editor、
 第一次把本機資料匯入雲端：
 
 ```bash
-.venv/bin/python -m scripts.import_library_to_supabase
+.venv/bin/python -m scripts.import_library_to_supabase \
+  --lecture-date 2026-07-07 \
+  --source-video "2026-07-07 14-12-27.mp4" \
+  --storage-prefix "2026-07-07"
 ```
 
 雲端模式會保存 metadata、字幕、逐字稿與教案集合。影片仍使用 metadata 內的素材路徑；部署到網路前，需要把這些路徑換成可存取的雲端影片網址。
+
+多日期資料使用 `record_id` 作為唯一鍵，例如 `20260707_CARD001`；原始 `card_id` 仍保留為 `CARD001`。因此不同日期資料夾可使用相同影片檔名，不會互相覆蓋。
 
 ## 放在雲端硬碟
 

@@ -30,3 +30,18 @@
 
 正式使用前應加入 Supabase Auth，將寫入權限改成僅限登入成員。
 
+## 4. 將既有資料升級成多日期結構
+
+如果 `atlas_cases` 已經有 2026-07-07 的 34 張卡片，請在 SQL Editor 執行：
+
+`supabase/migrations/20260809_multi_date_cases.sql`
+
+執行後：
+
+- `record_id`：跨日期唯一鍵，例如 `20260707_CARD001`
+- `card_id`：課程內編號，例如 `CARD001`
+- `lecture_date`：上課日期
+- `source_video`：原始長影片檔名
+- `storage_path`：雲端日期資料夾與影片檔名
+
+不同日期可擁有相同的 `CARD001.mp4`，因為實際識別會同時使用日期與卡片編號。

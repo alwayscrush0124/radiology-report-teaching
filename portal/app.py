@@ -36,6 +36,16 @@ def tags(case: dict, field: str) -> set[str]:
     return set(case.get(field, []))
 
 
+def case_key(case: dict) -> str:
+    return case.get("record_id") or case["card_id"]
+
+
+def case_label(case: dict) -> str:
+    date = case.get("lecture_date", "")
+    prefix = f"{date} · " if date else ""
+    return f"{prefix}{case['card_id']} · {case['title']}"
+
+
 def show_video(repo: TeachingLibrary, case: dict) -> None:
     video = repo.resolve_asset(case["assets"].get("teaching_clip", ""))
     subtitle = repo.resolve_asset(case["assets"].get("subtitle", ""))
@@ -71,15 +81,19 @@ def library_page(repo: TeachingLibrary) -> None:
     vitamin_options = sorted({tag["code"] for case in cases for tag in case.get("vitamin_cd", [])})
     anatomy_options = sorted({value for case in cases for value in case.get("anatomy", [])})
     modality_options = sorted({value for case in cases for value in case.get("modality", [])})
+    date_options = sorted({case.get("lecture_date", "") for case in cases if case.get("lecture_date")}, reverse=True)
     query = st.text_input("搜尋標題或教學重點")
-    f1, f2, f3 = st.columns(3)
-    vitamin = f1.multiselect("VITAMIN-CD", vitamin_options)
-    anatomy = f2.multiselect("解剖部位", anatomy_options)
-    modality = f3.multiselect("Modality", modality_options)
+    f1, f2, f3, f4 = st.columns(4)
+    dates = f1.multiselect("上課日期", date_options)
+    vitamin = f2.multiselect("VITAMIN-CD", vitamin_options)
+    anatomy = f3.multiselect("解剖部位", anatomy_options)
+    modality = f4.multiselect("Modality", modality_options)
     filtered = []
     for case in cases:
         haystack = f"{case['title']} {case.get('teaching_point', '')}".lower()
         if query and query.lower() not in haystack:
+            continue
+        if dates and case.get("lecture_date") not in dates:
             continue
         if vitamin and not set(vitamin).issubset(tags(case, "vitamin_cd")):
             continue
@@ -89,15 +103,17 @@ def library_page(repo: TeachingLibrary) -> None:
             continue
         filtered.append(case)
     st.caption(f"找到 {len(filtered)} 個 Cases")
-    selected_id = st.selectbox("選擇 Case", [case["card_id"] for case in filtered], format_func=lambda card_id: next(f"{case['card_id']} · {case['title']}" for case in filtered if case["card_id"] == card_id)) if filtered else None
+    selected_id = st.selectbox("選擇 Case", [case_key(case) for case in filtered], format_func=lambda value: next(case_label(case) for case in filtered if case_key(case) == value)) if filtered else None
     if not selected_id:
         return
-    case = next(case for case in filtered if case["card_id"] == selected_id)
+    case = next(case for case in filtered if case_key(case) == selected_id)
     media, content = st.columns([1.2, 1])
     with media:
         show_video(repo, case)
     with content:
         st.subheader(case["title"])
+        if case.get("lecture_date"):
+            st.write("**上課日期：**", case["lecture_date"])
         st.write("**VITAMIN-CD：**", "、".join(f"{tag['code']} {tag['label']}" for tag in case["vitamin_cd"]))
         st.write("**部位：**", "、".join(case["anatomy"]))
         st.write("**影像：**", "、".join(case["modality"] + case["sequences"]))
@@ -110,7 +126,7 @@ def library_page(repo: TeachingLibrary) -> None:
 def review_page(repo: TeachingLibrary) -> None:
     st.title("Review Workspace")
     cases = repo.load_cases()
-    card_id = st.selectbox("選擇待審 Case", [case["card_id"] for case in cases], format_func=lambda value: next(f"{case['card_id']} · {case['title']}" for case in cases if case["card_id"] == value))
+    card_id = st.selectbox("選擇待審 Case", [case_key(case) for case in cases], format_func=lambda value: next(case_label(case) for case in cases if case_key(case) == value))
     case = repo.get_case(card_id)
     video_col, form_col = st.columns([1.1, 1])
     with video_col:
@@ -138,7 +154,7 @@ def review_page(repo: TeachingLibrary) -> None:
 def transcript_page(repo: TeachingLibrary) -> None:
     st.title("Transcript Editor")
     cases = repo.load_cases()
-    card_id = st.selectbox("選擇 Case", [case["card_id"] for case in cases], format_func=lambda value: next(f"{case['card_id']} · {case['title']}" for case in cases if case["card_id"] == value), key="transcript_case")
+    card_id = st.selectbox("選擇 Case", [case_key(case) for case in cases], format_func=lambda value: next(case_label(case) for case in cases if case_key(case) == value), key="transcript_case")
     case = repo.get_case(card_id)
     video_col, editor_col = st.columns([1, 1.25])
     with video_col:
@@ -163,7 +179,7 @@ def transcript_page(repo: TeachingLibrary) -> None:
 def card_editor_page(repo: TeachingLibrary) -> None:
     st.title("Card Editor")
     cases = repo.load_cases()
-    card_id = st.selectbox("選擇 Case", [case["card_id"] for case in cases], format_func=lambda value: next(f"{case['card_id']} · {case['title']}" for case in cases if case["card_id"] == value), key="card_editor_case")
+    card_id = st.selectbox("選擇 Case", [case_key(case) for case in cases], format_func=lambda value: next(case_label(case) for case in cases if case_key(case) == value), key="card_editor_case")
     case = repo.get_case(card_id)
     media_col, editor_col = st.columns([1, 1.15])
     with media_col:
@@ -197,14 +213,14 @@ def card_editor_page(repo: TeachingLibrary) -> None:
 def builder_page(repo: TeachingLibrary) -> None:
     st.title("Teaching Set Builder")
     cases = repo.load_cases()
-    selected = st.multiselect("選擇 Cases（順序即教案順序）", [case["card_id"] for case in cases], format_func=lambda value: next(f"{case['card_id']} · {case['title']}" for case in cases if case["card_id"] == value))
+    selected = st.multiselect("選擇 Cases（順序即教案順序）", [case_key(case) for case in cases], format_func=lambda value: next(case_label(case) for case in cases if case_key(case) == value))
     name = st.text_input("教案名稱")
     description = st.text_area("教案說明")
     if selected:
         st.write("**內容順序**")
         for number, card_id in enumerate(selected, 1):
-            case = next(case for case in cases if case["card_id"] == card_id)
-            st.write(f"{number}. {case['title']}")
+            case = next(case for case in cases if case_key(case) == card_id)
+            st.write(f"{number}. {case_label(case)}")
     if st.button("建立教案索引", type="primary", disabled=not (name and selected)):
         path = repo.create_teaching_set(name, selected, description)
         st.success(f"已建立：{path}")

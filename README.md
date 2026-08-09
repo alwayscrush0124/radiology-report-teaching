@@ -188,6 +188,8 @@ Portal 提供 Dashboard、Case Library、Review Workspace 與 Teaching Set Build
 
 公開部署時，去識別化的卡片 metadata、字幕、逐字稿與教案集合可存入 Supabase；大型影片仍應放在獨立的雲端檔案空間。資料表與權限設定請見 [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md)。
 
+多日期資料以 `YYYYMMDD_CARDxxx` 作為唯一 `record_id`，因此每個日期資料夾可以沿用相同的影片檔名。Portal 可依上課日期篩選，同一疾病也能跨日期搜尋與組成教案。
+
 Streamlit Community Cloud 的部署欄位、Secrets 與公開權限設定請見 [`docs/STREAMLIT_DEPLOYMENT.md`](docs/STREAMLIT_DEPLOYMENT.md)。
 
 ## Teaching Moment 偵測類型

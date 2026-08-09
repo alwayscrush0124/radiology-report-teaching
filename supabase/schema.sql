@@ -2,7 +2,11 @@
 -- Store only de-identified teaching content. Keep source videos outside Supabase.
 
 create table if not exists public.atlas_cases (
-  card_id text primary key,
+  record_id text primary key,
+  card_id text not null,
+  lecture_date date not null,
+  source_video text not null default '',
+  storage_path text not null default '',
   metadata jsonb not null default '{}'::jsonb,
   subtitle text not null default '',
   transcript text not null default '',
@@ -21,6 +25,9 @@ create table if not exists public.atlas_teaching_sets (
 
 create index if not exists atlas_cases_metadata_gin
   on public.atlas_cases using gin (metadata);
+
+create index if not exists atlas_cases_lecture_date_card_id
+  on public.atlas_cases (lecture_date desc, card_id);
 
 create or replace function public.set_atlas_updated_at()
 returns trigger
@@ -63,14 +70,14 @@ drop policy if exists "atlas cases can be inserted" on public.atlas_cases;
 create policy "atlas cases can be inserted"
 on public.atlas_cases for insert
 to anon, authenticated
-with check (card_id <> '' and jsonb_typeof(metadata) = 'object');
+with check (record_id <> '' and card_id <> '' and jsonb_typeof(metadata) = 'object');
 
 drop policy if exists "atlas cases can be updated" on public.atlas_cases;
 create policy "atlas cases can be updated"
 on public.atlas_cases for update
 to anon, authenticated
 using (true)
-with check (card_id <> '' and jsonb_typeof(metadata) = 'object');
+with check (record_id <> '' and card_id <> '' and jsonb_typeof(metadata) = 'object');
 
 drop policy if exists "atlas teaching sets are readable" on public.atlas_teaching_sets;
 create policy "atlas teaching sets are readable"
@@ -90,4 +97,3 @@ on public.atlas_teaching_sets for update
 to anon, authenticated
 using (true)
 with check (name <> '' and cardinality(card_ids) > 0);
-
