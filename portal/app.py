@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -51,6 +52,9 @@ def show_video(repo: TeachingLibrary, case: dict) -> None:
     subtitle = repo.resolve_asset(case["assets"].get("subtitle", ""))
     if not video:
         st.warning("找不到教學影片")
+        return
+    if str(video).startswith("https://drive.google.com/file/d/") and str(video).endswith("/preview"):
+        components.iframe(str(video), height=500, scrolling=False)
         return
     try:
         st.video(str(video), subtitles=str(subtitle) if subtitle else None)

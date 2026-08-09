@@ -29,6 +29,15 @@ Portal 包含 Dashboard、Case Library、Review Workspace、Transcript Editor、
 
 多日期資料使用 `record_id` 作為唯一鍵，例如 `20260707_CARD001`；原始 `card_id` 仍保留為 `CARD001`。因此不同日期資料夾可使用相同影片檔名，不會互相覆蓋。
 
+Google Drive 影片使用公開 `/preview` 網址，Portal 會自動切換為 Drive 內嵌播放器。批次連結工具接受 `filename -> Drive file ID` 的 JSON mapping：
+
+```bash
+.venv/bin/python -m scripts.link_google_drive_videos \
+  --lecture-date 2026-07-07 \
+  --mapping data/drive_maps/2026-07-07.json \
+  --apply
+```
+
 ## 放在雲端硬碟
 
 整個 `radiology_report_teaching_atlas` 資料夾可以移到 iCloud Drive、Google Drive、Dropbox 或 OneDrive。Portal 使用相對路徑，不依賴原本的 `/Users/...` 位置。
