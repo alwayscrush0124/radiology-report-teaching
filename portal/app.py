@@ -5,11 +5,11 @@ import sys
 from pathlib import Path
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from portal.library import TeachingLibrary
+from portal.media import playable_video_url, srt_to_vtt
 from portal.supabase_library import SupabaseTeachingLibrary
 
 
@@ -53,8 +53,13 @@ def show_video(repo: TeachingLibrary, case: dict) -> None:
     if not video:
         st.warning("找不到教學影片")
         return
-    if str(video).startswith("https://drive.google.com/file/d/") and str(video).endswith("/preview"):
-        components.iframe(str(video), height=500, scrolling=False)
+    video_url = playable_video_url(str(video))
+    if video_url != str(video):
+        try:
+            current_subtitle = repo.read_case_text(case_key(case), "subtitle")
+        except (FileNotFoundError, ValueError):
+            current_subtitle = ""
+        st.video(video_url, subtitles=srt_to_vtt(current_subtitle) if current_subtitle else None)
         return
     try:
         st.video(str(video), subtitles=str(subtitle) if subtitle else None)
@@ -160,6 +165,8 @@ def transcript_page(repo: TeachingLibrary) -> None:
     cases = repo.load_cases()
     card_id = st.selectbox("選擇 Case", [case_key(case) for case in cases], format_func=lambda value: next(case_label(case) for case in cases if case_key(case) == value), key="transcript_case")
     case = repo.get_case(card_id)
+    if st.session_state.pop("transcript_saved", None) == card_id:
+        st.success("字幕與逐字稿已儲存，播放器已載入最新字幕。")
     video_col, editor_col = st.columns([1, 1.25])
     with video_col:
         show_video(repo, case)
@@ -177,7 +184,8 @@ def transcript_page(repo: TeachingLibrary) -> None:
                 except ValueError as exc:
                     st.error(f"字幕格式檢查未通過：{exc}")
                 else:
-                    st.success("字幕與逐字稿已儲存。")
+                    st.session_state["transcript_saved"] = card_id
+                    st.rerun()
 
 
 def card_editor_page(repo: TeachingLibrary) -> None:
