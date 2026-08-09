@@ -25,13 +25,27 @@ const defaultSections = [
   { title: "腫瘤與 treatment effect", subtitle: "Glioma、術後 baseline、radiation change 與 protocol", ids: cards.slice(22, 29).map((c) => c.card_id) },
   { title: "感染、出血與安全溝通", subtitle: "ICH workup、vascular cause 與避免不必要處置", ids: cards.slice(29, 34).map((c) => c.card_id) },
 ];
-const datedSections = cards.length === 26 ? [
+const datedSections = deckDate === "2026-08-04" ? [
+  { title: "小血管疾病與 CAA", subtitle: "Hypertension、PRES、CAA、CAA-ri、CADASIL 與 HIV", ids: cards.slice(0, 6).map((c) => c.card_id) },
+  { title: "感染、免疫重建與創傷", subtitle: "PML、IRIS、traumatic axonal injury 與 fat embolism", ids: cards.slice(6, 9).map((c) => c.card_id) },
+  { title: "Microbleeds 與 autoimmune disease", subtitle: "分布式鑑別、autoimmune encephalitis、ADEM 與 MOGAD", ids: cards.slice(9, 12).map((c) => c.card_id) },
+  { title: "Perivascular 與代謝性腦病", subtitle: "CLIPPERS、glucose-related injury 與 uremic encephalopathy", ids: cards.slice(12, 16).map((c) => c.card_id) },
+  { title: "放療與藥物治療後傷害", subtitle: "Leukoencephalopathy、radiation necrosis、SMART 與 methotrexate", ids: cards.slice(16, 21).map((c) => c.card_id) },
+  { title: "癲癇相關腫瘤與 central skull base", subtitle: "Low-grade tumors、DNET、pituitary origin 與 chordoma", ids: cards.slice(21).map((c) => c.card_id) },
+] : cards.length === 26 ? [
   { title: "基礎判讀與初始線索", subtitle: "Sella、硬腦膜出血與灌流影像", ids: cards.slice(0, 3).map((c) => c.card_id) },
   { title: "Moyamoya 與 EDAS", subtitle: "Flow void、ivy sign、collateral、perfusion 與術後追蹤", ids: cards.slice(3, 10).map((c) => c.card_id) },
   { title: "PSP 與量化影像", subtitle: "MRPI、MRPI 2.0 與臨床適用限制", ids: cards.slice(10, 13).map((c) => c.card_id) },
   { title: "腫瘤分期與腦中風", subtitle: "DOI、慢性病灶、M1 occlusion 與 EVT", ids: cards.slice(13, 17).map((c) => c.card_id) },
   { title: "Sellar、spine 與 glioma", subtitle: "Macroadenoma、craniopharyngioma、dural ectasia 與治療後變化", ids: cards.slice(17, 23).map((c) => c.card_id) },
   { title: "NPC 與顱底神經", subtitle: "Location-first differential、壞死與 hypoglossal palsy", ids: cards.slice(23).map((c) => c.card_id) },
+] : cards.length === 20 ? [
+  { title: "顱底、CPA 與放療後變化", subtitle: "鈣化、CPA mass 與 NPC 放療後影像", ids: cards.slice(0, 3).map((c) => c.card_id) },
+  { title: "頭頸腫瘤影像", subtitle: "舌癌、NPC staging 與骨髓轉化", ids: cards.slice(3, 6).map((c) => c.card_id) },
+  { title: "顱底骨病灶與後顱窩", subtitle: "Fibrous dysplasia、hemangioblastoma、真菌性鼻竇炎與 pontine lesions", ids: cards.slice(6, 10).map((c) => c.card_id) },
+  { title: "血管、失智與跨模態判讀", subtitle: "Aneurysm、dementia、CT/MRI 對照與術後腫瘤", ids: cards.slice(10, 15).map((c) => c.card_id) },
+  { title: "淋巴瘤與腦動靜脈畸形", subtitle: "CNS lymphoma、AVM anatomy 與 Spetzler-Martin grading", ids: cards.slice(15, 19).map((c) => c.card_id) },
+  { title: "兒童鞍上區腫瘤", subtitle: "Optic-hypothalamic glioma 的 location-first 判讀", ids: cards.slice(19).map((c) => c.card_id) },
 ] : [
   { title: "急診與腦血管", subtitle: "Delirium、stroke、灌流與硬腦膜下出血", ids: cards.slice(0, 5).map((c) => c.card_id) },
   { title: "淋巴瘤與腫瘤追蹤", subtitle: "跨模態判讀、治療反應與量測原則", ids: cards.slice(5, 9).map((c) => c.card_id) },
