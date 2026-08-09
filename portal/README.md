@@ -38,6 +38,8 @@ Google Drive 影片使用公開 `/preview` 網址，Portal 會自動切換為 Dr
   --apply
 ```
 
+Portal 會將 Drive preview 網址轉成可串流的 MP4 網址，再用 Streamlit 原生播放器載入 Supabase 中的最新版 SRT。Transcript Editor 儲存成功後會立即重新載入頁面，因此 Case Library 與各編輯分頁下一次播放時都會使用更新後的字幕。
+
 ## 放在雲端硬碟
 
 整個 `radiology_report_teaching_atlas` 資料夾可以移到 iCloud Drive、Google Drive、Dropbox 或 OneDrive。Portal 使用相對路徑，不依賴原本的 `/Users/...` 位置。
