@@ -20,57 +20,57 @@ st.set_page_config(page_title="Radiology Teaching Atlas", page_icon="R", layout=
 APP_CSS = """
 <style>
 :root {
-  --atlas-ink: #172b2a;
-  --atlas-muted: #60706f;
-  --atlas-line: #dfe8e6;
-  --atlas-teal: #087f73;
-  --atlas-teal-soft: #eaf6f3;
-  --atlas-coral: #c6533f;
-  --atlas-coral-soft: #fff1ed;
-  --atlas-green-soft: #eef7e9;
+  --atlas-ink: #374151;
+  --atlas-heading: #1f2937;
+  --atlas-muted: #6b7280;
+  --atlas-line: #e5e7eb;
+  --atlas-primary: #066fd1;
+  --atlas-primary-soft: #edf6ff;
+  --atlas-danger: #d63939;
+  --atlas-warning: #f59f00;
   --atlas-paper: #ffffff;
-  --atlas-canvas: #f6f9f8;
+  --atlas-canvas: #f9fafb;
 }
-.stApp { background: var(--atlas-canvas); color: var(--atlas-ink); }
+.stApp { background: var(--atlas-canvas); color: var(--atlas-ink); font-size: 14px; }
 [data-testid="stMainBlockContainer"] { max-width: 1500px; padding-top: 4.5rem; padding-bottom: 4rem; }
-[data-testid="stSidebar"] { background: #f0f6f4; border-right: 1px solid var(--atlas-line); }
+[data-testid="stSidebar"] { background: #ffffff; border-right: 1px solid var(--atlas-line); }
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color: var(--atlas-muted); }
 [data-testid="stSidebar"] [role="radiogroup"] label {
   padding: .52rem .7rem; border-radius: 6px; margin-bottom: .18rem;
 }
 [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
-  background: #dceee9; color: #075f57; font-weight: 650;
+  background: var(--atlas-primary-soft); color: var(--atlas-primary); font-weight: 650;
 }
-h1, h2, h3 { color: var(--atlas-ink); letter-spacing: 0; }
+h1, h2, h3 { color: var(--atlas-heading); letter-spacing: 0; }
 h1 { font-size: 2rem !important; line-height: 1.2 !important; }
 h2 { font-size: 1.35rem !important; }
 h3 { font-size: 1.08rem !important; }
-.atlas-kicker { color: var(--atlas-teal); font-size: .78rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.atlas-kicker { color: var(--atlas-muted); font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .atlas-header { margin-bottom: 1.2rem; }
 .atlas-header h1 { margin: .18rem 0 .2rem; }
 .atlas-header p { color: var(--atlas-muted); margin: 0; max-width: 760px; }
 .atlas-brand { padding: .45rem .15rem 1rem; border-bottom: 1px solid var(--atlas-line); margin-bottom: .8rem; }
-.atlas-brand strong { display: block; color: #075f57; font-size: 1.05rem; }
+.atlas-brand strong { display: block; color: var(--atlas-heading); font-size: 1.05rem; }
 .atlas-brand span { color: var(--atlas-muted); font-size: .78rem; }
 [data-testid="stMetric"] { background: var(--atlas-paper); border: 1px solid var(--atlas-line); border-radius: 7px; padding: .85rem 1rem; }
 [data-testid="stMetricLabel"] { color: var(--atlas-muted); }
 [data-testid="stMetricValue"] { color: var(--atlas-ink); }
 [data-testid="stVerticalBlockBorderWrapper"] { background: var(--atlas-paper); border-color: var(--atlas-line) !important; border-radius: 7px !important; }
 [data-baseweb="input"] > div, [data-baseweb="select"] > div, textarea {
-  border-color: #cad8d5 !important; border-radius: 6px !important; background: var(--atlas-paper) !important;
+  border-color: #d1d5db !important; border-radius: 6px !important; background: var(--atlas-paper) !important;
 }
 .stButton button, .stDownloadButton button, [data-testid="stFormSubmitButton"] button { border-radius: 6px; font-weight: 650; }
-.stButton button[kind="primary"], [data-testid="stFormSubmitButton"] button[kind="primary"] { background: var(--atlas-teal); border-color: var(--atlas-teal); }
+.stButton button[kind="primary"], [data-testid="stFormSubmitButton"] button[kind="primary"] { background: var(--atlas-primary); border-color: var(--atlas-primary); }
 .atlas-meta { display: flex; flex-wrap: wrap; gap: .42rem; margin: .5rem 0 1rem; }
-.atlas-chip { display: inline-flex; align-items: center; border: 1px solid #cfe0dc; background: #f2f8f6; color: #275c56; border-radius: 999px; padding: .2rem .55rem; font-size: .78rem; }
-.atlas-guide { border-left: 4px solid var(--atlas-teal); background: var(--atlas-paper); border-top: 1px solid var(--atlas-line); border-right: 1px solid var(--atlas-line); border-bottom: 1px solid var(--atlas-line); border-radius: 6px; padding: .85rem 1rem; margin: 0 0 .72rem; }
-.atlas-guide.pitfall { border-left-color: var(--atlas-coral); background: var(--atlas-coral-soft); }
-.atlas-guide.checklist { border-left-color: #648f3d; background: var(--atlas-green-soft); }
-.atlas-guide.phrase { border-left-color: #3d6f98; background: #edf5fa; }
+.atlas-chip { display: inline-flex; align-items: center; border: 1px solid #dbe1e8; background: #f3f4f6; color: #4b5563; border-radius: 999px; padding: .2rem .55rem; font-size: .78rem; }
+.atlas-guide { border-left: 4px solid var(--atlas-primary); background: var(--atlas-paper); border-top: 1px solid var(--atlas-line); border-right: 1px solid var(--atlas-line); border-bottom: 1px solid var(--atlas-line); border-radius: 6px; padding: .85rem 1rem; margin: 0 0 .72rem; }
+.atlas-guide.pitfall { border-left-color: var(--atlas-danger); }
+.atlas-guide.checklist { border-left-color: var(--atlas-warning); }
+.atlas-guide.phrase { border-left-color: #4263eb; }
 .atlas-guide .label { color: var(--atlas-muted); font-size: .76rem; font-weight: 750; letter-spacing: .05em; margin-bottom: .28rem; }
 .atlas-guide .text { color: var(--atlas-ink); line-height: 1.65; }
 .atlas-result { color: var(--atlas-muted); font-size: .86rem; margin: .3rem 0 .55rem; }
-video { border-radius: 7px; background: #101817; border: 1px solid #263b38; }
+video { border-radius: 7px; background: #111827; border: 1px solid #d1d5db; }
 hr { border-color: var(--atlas-line) !important; }
 @media (max-width: 900px) {
   [data-testid="stMainBlockContainer"] { padding-left: 1rem; padding-right: 1rem; padding-top: 4rem; }
@@ -183,7 +183,7 @@ def dashboard_page(repo: TeachingLibrary) -> None:
     left, right = st.columns(2, gap="large")
     with left:
         st.subheader("VITAMIN-CD 分布")
-        st.bar_chart(stats["vitamin"], horizontal=True, color="#087f73")
+        st.bar_chart(stats["vitamin"], horizontal=True, color="#066fd1")
     with right:
         st.subheader("審核狀態")
         review_labels = {
@@ -191,7 +191,7 @@ def dashboard_page(repo: TeachingLibrary) -> None:
             "adjust_end": "調整終點", "wrong_visual": "畫面不符", "reject": "不採用",
         }
         review_data = {review_labels.get(key, key): value for key, value in stats["review"].items()}
-        st.bar_chart(review_data, horizontal=True, color="#c6533f")
+        st.bar_chart(review_data, horizontal=True, color="#d63939")
 
 
 def library_page(repo: TeachingLibrary) -> None:
