@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from portal.library import TeachingLibrary
 from portal.media import DriveVideoError, download_drive_video, playable_video_url, srt_to_vtt
-from portal.supabase_library import SupabaseTeachingLibrary
+from portal.supabase_library import SupabaseError, SupabaseTeachingLibrary
 
 
 st.set_page_config(page_title="Radiology Teaching Atlas", page_icon="R", layout="wide", initial_sidebar_state="auto")
@@ -362,15 +362,20 @@ page_label = st.sidebar.radio("功能", list(pages))
 page = pages[page_label]
 st.sidebar.divider()
 st.sidebar.caption(f"資料來源：{repo.location_label}")
-if page == "Dashboard":
-    dashboard_page(repo)
-elif page == "Case Library":
-    library_page(repo)
-elif page == "Review Workspace":
-    review_page(repo)
-elif page == "Transcript Editor":
-    transcript_page(repo)
-elif page == "Card Editor":
-    card_editor_page(repo)
-else:
-    builder_page(repo)
+try:
+    if page == "Dashboard":
+        dashboard_page(repo)
+    elif page == "Case Library":
+        library_page(repo)
+    elif page == "Review Workspace":
+        review_page(repo)
+    elif page == "Transcript Editor":
+        transcript_page(repo)
+    elif page == "Card Editor":
+        card_editor_page(repo)
+    else:
+        builder_page(repo)
+except SupabaseError:
+    st.error("資料庫暫時無法連線，病例資料目前沒有遺失。請稍後重新整理；若持續發生，請至 Supabase Dashboard 確認專案是否已暫停。")
+    if st.button("重新嘗試", type="primary"):
+        st.rerun()
